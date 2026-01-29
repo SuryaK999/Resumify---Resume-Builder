@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumify - Resume Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Outfit:wght@100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <aside class="sidebar">
+        <header class="sb-header">
+            <div class="logo">
+                <i data-lucide="sun" style="color: #6366f1;"></i>
+                <span>Resumify</span>
+            </div>
+            <div class="strength-meter-box">
+                <svg width="28" height="28" viewBox="0 0 32 32" class="strength-ring-svg">
+                    <circle class="meter-bg" cx="16" cy="16" r="14" fill="none" stroke-width="3"></circle>
+                    <circle class="meter-prog" id="strength-ring" cx="16" cy="16" r="14" fill="none" stroke-width="3">
+                    </circle>
+                </svg>
+                <span id="strength-val">0%</span>
+            </div>
+        </header>
+
+        <nav class="sb-nav">
+            <button class="nav-btn active" data-tab="content">Content</button>
+            <button class="nav-btn" data-tab="design">Design</button>
+            <button class="nav-btn" data-tab="config">Config</button>
+        </nav>
+
+        <main class="sb-content">
+            <div id="tab-content" class="tab-pane">
+                <!-- Personal Identity -->
+                <div class="group">
+                    <div class="group-title">Personal Identity</div>
+
+                    <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div id="avatar-trigger"
+                            style="width: 50px; height: 50px; border-radius: 50%; border:1px solid var(--ui-border); cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
+                            <img id="ed-avatar" src="" style="width:100%; height:100%; object-fit:cover;"
+                                class="hidden">
+                            <i data-lucide="camera" style="width: 20px;"></i>
+                        </div>
+                        <input type="file" id="avatar-input" accept="image/*" hidden>
+                        <div class="f-wrap" style="flex:1; margin-bottom:0;">
+                            <label>Full Name</label>
+                            <input type="text" id="in-name" placeholder="Your Name">
+                        </div>
+                    </div>
+
+                    <div class="f-wrap">
+                        <label>Professional Title</label>
+                        <input type="text" id="in-job" placeholder="Student / Professional Title">
+                    </div>
+
+                    <div class="input-row">
+                        <div class="f-wrap">
+                            <label>Email</label>
+                            <input type="email" id="in-email" placeholder="email@example.com">
+                        </div>
+                        <div class="f-wrap">
+                            <label>Phone</label>
+                            <input type="text" id="in-phone" placeholder="Phone Number">
+                        </div>
+                    </div>
+
+                    <div class="f-wrap">
+                        <label>Location</label>
+                        <input type="text" id="in-loc" placeholder="City, Country">
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div class="group-title">Social Connectivity</div>
+                    <div class="f-wrap">
+                        <label>LinkedIn URL</label>
+                        <input type="text" id="in-linkedin" placeholder="linkedin.com/in/username">
+                    </div>
+                    <div class="f-wrap">
+                        <label>GitHub URL</label>
+                        <input type="text" id="in-github" placeholder="github.com/username">
+                    </div>
+                    <div class="f-wrap">
+                        <label>Portfolio / Site</label>
+                        <input type="text" id="in-portfolio" placeholder="your-portfolio.me">
+                    </div>
+                </div>
+
+                <div id="sortable-sections">
+                    <div class="group sortable-item" draggable="true" data-section="summary">
+                        <div class="group-title">
+                            Professional Summary
+                            <i data-lucide="wand-2" class="phrase-trigger" data-target="summary"
+                                style="width:14px; cursor:pointer;"></i>
+                        </div>
+                        <textarea id="in-summary" rows="4" placeholder="Craft your summary..."></textarea>
+                    </div>
+
+                    <div class="group sortable-item" draggable="true" data-section="projects">
+                        <div class="group-title">Featured Projects</div>
+                        <div id="proj-editor"></div>
+                        <button id="add-proj" class="btn-add-light">+ Add Project</button>
+                    </div>
+                    <div class="group sortable-item" draggable="true" data-section="experience">
+                        <div class="group-title">Work History</div>
+                        <div id="exp-editor"></div>
+                        <button id="add-exp" class="btn-add-light">+ Add Work Experience</button>
+                    </div>
+
+                    <div class="group sortable-item" draggable="true" data-section="education">
+                        <div class="group-title">Academic History</div>
+                        <div id="edu-editor"></div>
+                        <button id="add-edu" class="btn-add-light">+ Add Academic Entry</button>
+                    </div>
+
+                    <div class="group sortable-item" draggable="true" data-section="certs">
+                        <div class="group-title">Certifications</div>
+                        <div id="cert-editor"></div>
+                        <button id="add-cert" class="btn-add-light">+ Add Certification</button>
+                    </div>
+                    <div class="group sortable-item" draggable="true" data-section="skills">
+                        <div class="group-title">Expertise Mapping</div>
+                        <div class="f-wrap">
+                            <label>Hard Skills Display Mode</label>
+                            <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
+                                <button id="skill-mode-mastery" class="skill-mode-btn active"
+                                    data-mode="mastery">Technical Mastery</button>
+                                <button id="skill-mode-known" class="skill-mode-btn" data-mode="known">Skills
+                                    Known</button>
+                            </div>
+                        </div>
+                        <div class="f-wrap">
+                            <label>Hard Skills (e.g. React:90)</label>
+                            <input type="text" id="skill-in" placeholder="Skill:Level + Enter">
+                            <div id="skill-tags-ed" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem;">
+                            </div>
+                        </div>
+                        <div class="f-wrap">
+                            <label>Professional (Soft) Qualities</label>
+                            <input type="text" id="soft-in" placeholder="Type quality + Enter">
+                            <div id="soft-tags-ed" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="group sortable-item" draggable="true" data-section="languages">
+                        <div class="group-title">Languages Known</div>
+                        <div class="f-wrap">
+                            <input type="text" id="lang-in" placeholder="Type language + Enter">
+                            <div id="lang-tags-ed" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- TAB: DESIGN -->
+            <div id="tab-design" class="tab-pane hidden">
+                <div class="group">
+                    <div class="group-title">Resume Colors (PDF Only)</div>
+                    <div class="input-row" style="margin-bottom:1rem;">
+                        <button class="th-opt" data-type="paper" data-theme="#6366f1"
+                            style="background:#6366f1; width:24px; height:24px; border-radius:50%; border:2px solid white; cursor:pointer;"></button>
+                        <button class="th-opt" data-type="paper" data-theme="#e11d48"
+                            style="background:#e11d48; width:24px; height:24px; border-radius:50%; border:2px solid white; cursor:pointer;"></button>
+                        <button class="th-opt" data-type="paper" data-theme="#10b981"
+                            style="background:#10b981; width:24px; height:24px; border-radius:50%; border:2px solid white; cursor:pointer;"></button>
+                        <button class="th-opt" data-type="paper" data-theme="#f59e0b"
+                            style="background:#f59e0b; width:24px; height:24px; border-radius:50%; border:2px solid white; cursor:pointer;"></button>
+                        <input type="color" id="paper-accent-picker"
+                            style="width:30px; height:30px; padding:0; border:none; background:none; cursor:pointer;"
+                            title="Custom PDF Color">
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div class="group-title">Website Theme</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                        <button class="btn-add-light th-web" data-web="default"
+                            style="flex:1; min-width:80px; font-size:0.75rem;">Dark</button>
+                        <button class="btn-add-light th-web" data-web="midnight"
+                            style="flex:1; min-width:80px; font-size:0.75rem;">Midnight</button>
+                        <button class="btn-add-light th-web" data-web="beach"
+                            style="flex:1; min-width:80px; font-size:0.75rem;">Beach</button>
+                        <button class="btn-add-light th-web" data-web="cyber"
+                            style="flex:1; min-width:80px; font-size:0.75rem;">Cyber</button>
+                        <button class="btn-add-light th-web" data-web="glass"
+                            style="flex:1; min-width:80px; font-size:0.75rem;">Glass</button>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div class="group-title">Typography Manager</div>
+                    <div class="f-wrap">
+                        <label>Font Pairing</label>
+                        <select id="font-pair-select"
+                            style="width:100%; padding:0.5rem; background:#000; color:white; border:1px solid #333; border-radius:8px;">
+                            <option value="modern">Modern (Inter + Roboto)</option>
+                            <option value="classic">Classic (Playfair + Source)</option>
+                            <option value="tech">Tech (JetBrains + Jakarta)</option>
+                        </select>
+                    </div>
+                    <div class="f-wrap">
+                        <label>Heading Weight: <span id="val-weight">800</span></label>
+                        <input type="range" id="range-weight" min="100" max="900" step="100" value="800">
+                    </div>
+                    <div class="f-wrap">
+                        <label>Letter Spacing</label>
+                        <input type="range" id="range-spacing" min="-2" max="5" step="0.5" value="0">
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div class="group-title">Aesthetics Controller</div>
+                    <div class="f-wrap">
+                        <label>Glass Blur (px)</label>
+                        <input type="range" id="range-blur" min="0" max="20" value="0">
+                    </div>
+                    <div class="f-wrap">
+                        <label>Corner Roundness</label>
+                        <input type="range" id="range-radius" min="0" max="32" value="20">
+                    </div>
+                    <div class="f-wrap">
+                        <label>Border Opacity</label>
+                        <input type="range" id="range-border" min="0" max="1" step="0.1" value="1">
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div class="group-title">Reorder</div>
+                    <button class="btn-add-light" id="btn-swap-layout"
+                        style="display:flex; justify-content:center; align-items:center; gap:8px;">
+                        <i data-lucide="arrow-up-down"></i> Swap Experience / Projects
+                    </button>
+                </div>
+                <div class="group">
+                    <div class="group-title">Layout Engine</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button class="layout-opt nav-btn active" data-layout="traditional">Traditional</button>
+                        <button class="layout-opt nav-btn" data-layout="bento">Bento Box</button>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- TAB: CONFIG -->
+            <div id="tab-config" class="tab-pane hidden">
+                <div class="group">
+                    <div class="group-title">Data Management</div>
+                    <button id="btn-clear-all" class="btn-add-light"
+                        style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #ef4444;">
+                        Clear All Data
+                    </button>
+                </div>
+                <div class="group">
+                    <div class="group-title">Typography Settings</div>
+                    <div class="f-wrap">
+                        <label>Font Size (px)</label>
+                        <input type="number" id="cfg-size" value="14">
+                    </div>
+                </div>
+            </div>
+        </main>
+    </aside>
+    <main class="canvas">
+        <div class="paper" id="paper">
+            <div class="res-page" id="page">
+                <header class="res-header">
+                    <div style="flex:1;">
+                        <h1 class="res-name" id="p-name">Your Name</h1>
+                        <p class="res-role" id="p-role">Professional Title</p>
+
+                        <!-- Moved Contact Bar Up for Space Saving -->
+                        <div class="res-contact" id="p-contact-bar"
+                            style="margin-top: 0.8rem; padding: 0; border: none; font-size: 0.85rem;">
+                            <span id="p-email-w"><i data-lucide="mail"></i> <span id="p-email"></span></span>
+                            <span id="p-phone-w"><i data-lucide="phone"></i> <span id="p-phone"></span></span>
+                            <span id="p-loc-w"><i data-lucide="map-pin"></i> <span id="p-loc"></span></span>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                        <div class="res-avatar hidden" id="p-avatar-wrap">
+                            <img id="p-avatar" src="" alt="">
+                        </div>
+                        <div class="res-social-icons" id="p-social-icons">
+                            <a id="p-link-linkedin" href="#" target="_blank" class="social-icon hidden"><i
+                                    data-lucide="linkedin"></i></a>
+                            <a id="p-link-github" href="#" target="_blank" class="social-icon hidden"><i
+                                    data-lucide="github"></i></a>
+                            <a id="p-link-portfolio" href="#" target="_blank" class="social-icon hidden"><i
+                                    data-lucide="globe"></i></a>
+                        </div>
+                    </div>
+                </header>
+                <div id="preview-grid">
+                    <section class="res-sec" id="p-summary-wrapper">
+                        <div class="res-sec-title">Summary</div>
+                        <p class="res-item-d" id="p-summary"></p>
+                    </section>
+                    <section class="res-sec" id="p-projects-wrapper">
+                        <div class="res-sec-title">Featured Projects</div>
+                        <div id="p-projects" class="proj-grid"></div>
+                    </section>
+                    <section class="res-sec" id="p-experience-wrapper">
+                        <div class="res-sec-title">Work History</div>
+                        <div id="p-experience"></div>
+                    </section>
+                    <section class="res-sec" id="p-education-wrapper">
+                        <div class="res-sec-title">Academic History</div>
+                        <div id="p-education"></div>
+                    </section>
+                    <section class="res-sec" id="p-certs-wrapper">
+                        <div class="res-sec-title">Certifications</div>
+                        <div id="p-certs" class="cert-grid"></div>
+                    </section>
+                    <section class="res-sec" id="p-skills-wrapper">
+                        <div class="res-sec-title">Expertise Mapping</div>
+                        <div class="skills-container">
+                            <div class="hard-skills-box">
+                                <label class="skill-label">Technical Mastery</label>
+                                <div id="p-skills" class="hard-skills-grid"></div>
+                            </div>
+                            <div class="soft-skills-box">
+                                <label class="skill-label">Soft Skills</label>
+                                <div id="p-soft-skills" class="res-skills"></div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="res-sec" id="p-languages-wrapper">
+                        <div class="res-sec-title">Languages Known</div>
+                        <div id="p-languages" class="res-skills"></div>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <div class="hud">
+            <div class="zoom-bar">
+                <button class="hud-btn" id="zoom-out"><i data-lucide="minus"></i></button>
+                <span id="zoom-text"
+                    style="font-weight: 800; font-size: 0.8rem; width: 40px; text-align: center;">100%</span>
+                <button class="hud-btn" id="zoom-in"><i data-lucide="plus"></i></button>
+            </div>
+            <div style="width: 1px; height: 20px; background: #333;"></div>
+            <button class="btn-down" id="btn-print"><i data-lucide="download"></i> DOWNLOAD PDF</button>
+        </div>
+    </main>
+    <div id="intel-panel" class="intel-panel hidden">
+        <header class="intel-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i data-lucide="zap" style="color: #f59e0b;"></i>
+                <span id="intel-title" style="font-weight: 800; font-size: 0.9rem;">Intelligence Library</span>
+            </div>
+            <button id="close-intel" style="background:none; border:none; color:white; cursor:pointer;"><i
+                    data-lucide="x"></i></button>
+        </header>
+        <div class="intel-body">
+            <nav class="intel-menu" id="intel-niches"></nav>
+            <div class="intel-list" id="intel-phrases"></div>
+        </div>
+    </div>
+    <!-- Confetti Engine -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <div id="toast-container"
+        style="position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px; pointer-events:none;">
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
